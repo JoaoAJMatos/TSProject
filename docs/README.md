@@ -120,7 +120,20 @@ The server starts by initializing the __bootstrap procedure__. This is where all
 The server can be configured by modifying the config file located at `C:\iplchat\server\config.conf`:
 
 ```ini
-
+snapshotTimeout=24
+snapshotPath=C:\iplchat\server\snapshots\
+snapshotBacklog=10
+databasePath=C:\iplchat\server\database\
+databaseName=iplchat.db
+databaseBufferedAccess=True
+databaseQueueSize=100
+databaseFlushTimeout=10
+randomRateLimit=True
+rateLimit=1
+rateLimitMultiplier=2
+logfilePath=C:\iplchat\server\logs\iplchat.log
+logVerbose=True
+autosave=True
 ```
 
 > __Note:__ Be aware that some of the configs will only be applied after the server is restarted. Like the server port, Database stuff, Logger stuff, etc.
