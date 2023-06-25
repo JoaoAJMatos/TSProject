@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cliente", "Cliente.csproj", "{3C503916-BAB4-4C9F-886A-92E895FD2944}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Servidor", "Servidor\Servidor.csproj", "{C1534332-8A96-4E06-BB56-009AB28626FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{7DCE4C6E-1E30-4E95-BBF6-E3B1549874AD}"
+	ProjectSection(SolutionItems) = preProject
+		ConfigParser.cs = ConfigParser.cs
+		Protocol.cs = Protocol.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{D144E4BC-DFA7-4836-BFBC-B1FE3A9F01FD}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2C3EB166-92B1-4C83-B272-6971B6852DE8}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C503916-BAB4-4C9F-886A-92E895FD2944}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C503916-BAB4-4C9F-886A-92E895FD2944}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C503916-BAB4-4C9F-886A-92E895FD2944}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C503916-BAB4-4C9F-886A-92E895FD2944}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1534332-8A96-4E06-BB56-009AB28626FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1534332-8A96-4E06-BB56-009AB28626FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1534332-8A96-4E06-BB56-009AB28626FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1534332-8A96-4E06-BB56-009AB28626FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {477887E1-7072-4C9A-B6F8-43B126A4B86F}
+	EndGlobalSection
+EndGlobal
