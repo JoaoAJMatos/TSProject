@@ -12,9 +12,9 @@ For more information about the project, please refer to the [documentation](docs
 
 ## Screenshots
 
-![Screenshot 1](docs/screenshot1.png)
-![Screenshot 2](docs/screenshot2.png)
-![Screenshot 3](docs/screenshot3.png)
-![Screenshot 4](docs/screenshot4.png)
-![Screenshot 5](docs/screenshot5.png)
-![Screenshot 6](docs/screenshot6.png)
+![Screenshot 1](docs/Screenshot1.png)
+![Screenshot 2](docs/Screenshot2.png)
+![Screenshot 3](docs/Screenshot3.png)
+![Screenshot 4](docs/Screenshot4.png)
+![Screenshot 5](docs/Screenshot5.png)
+![Screenshot 6](docs/Screenshot6.png)
