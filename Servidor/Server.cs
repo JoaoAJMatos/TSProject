@@ -308,6 +308,7 @@ namespace Servidor
             if (!Bootstrap())
             {
                 Logger.LogConsole("Server bootsrap procedure failed.");
+                Logger.LogConsole("Please restart the server and try again.");
                 throw new Exception("Server bootstrap procedure failed.");
             }
 
@@ -367,17 +368,8 @@ namespace Servidor
         /// that handles the request.
         public override void OnRequest(int clientID)
         {
-            try
-            {
-                Packet receivedPacket = AssembleReceivedDataIntoPacket(clientID);
-                HandleRequest(clientID, receivedPacket);
-            }
-            catch (System.Exception e)
-            {
-                // If we are unable to create a packet from the received data,
-                // the data is most likely a FileTransfer packet.
-                
-            }
+            Packet receivedPacket = AssembleReceivedDataIntoPacket(clientID);
+            HandleRequest(clientID, receivedPacket);
         }
 
         /// Loads the required server configurations and data from the database.
@@ -732,6 +724,9 @@ namespace Servidor
                 case IPLChat.Protocol.PacketType.CLIENT_TO_CLIENT_HANDSHAKE2:
                     HandleClientToClientHandshakeSecondHalf(receivedPacket, clientID);  // Devided into 2 individual procedures (second half)
                     break;
+                case IPLChat.Protocol.PacketType.USERNAME_REQUEST:
+                    HandleUsernameRequest(receivedPacket, clientID);
+                    break;
                 default:
                     _logger.Log("Server received unknown or unexpected packet type: " + (int)packetType + " (" + packetType + ") from client " + clientID, Logger.Level.WARNING);
                     break;
@@ -929,6 +924,7 @@ namespace Servidor
             }
         }
 
+        // Logs out a client
         private void HandleLogoutRequest(Packet receivedPacket, int clientID)
         {            
             string UUID = _clientsMap[clientID].uuid;
@@ -954,6 +950,8 @@ namespace Servidor
             Send(Packet.Serialize(packet), clientID);
         }
 
+        // Handles the client join channel procedure.
+        // Subscribes a client to a channel.
         private void HandleJoinChannelRequest(Packet receivedPacket, int clientID)
         {
             byte[] encryptedData = receivedPacket.GetDataAs<byte[]>();
@@ -980,7 +978,7 @@ namespace Servidor
             // TODO
         }
 
-        /// Handles the checksum procedure between the client and the server
+        /// Handles the handshake procedure between the client and the server
         /// to establish a secure communication line.
         ///
         /// The client is then added to the list of authenticated clients.
@@ -1057,6 +1055,23 @@ namespace Servidor
             Send(Packet.Serialize(clientHandshakeNotification), clientID);
         }
 
+        private void HandleUsernameRequest(Packet receivedPacket, int clientID)
+        {
+            byte[] encryptedUUID = receivedPacket.GetDataAs<byte[]>();
+            byte[] decryptedUUID = _clientsMap[clientID].aes.Decrypt(encryptedUUID);
+            string uuid = Encoding.UTF8.GetString(decryptedUUID);
+
+            string username = _db.GetUsernameFromUUID(uuid);
+
+            byte[] encryptedUsername = _clientsMap[clientID].aes.Encrypt(Encoding.UTF8.GetBytes(username));
+
+            Packet usernamePacket = new Packet((int)IPLChat.Protocol.PacketType.USERNAME_RESPONSE);
+            usernamePacket.SetPayload(encryptedUsername);
+
+            Send(Packet.Serialize(usernamePacket), clientID);
+        }
+
+        // Gets the ProtoStream ID of the client with the specified UUID
         private int GetClientIDFromUUID(string uuid)
         {
             int id = -1;
@@ -1079,8 +1094,6 @@ namespace Servidor
             byte[] packetData = receivedPacket.GetDataAs<byte[]>();
             IPLChat.Protocol.Message message = IPLChat.Protocol.Message.Deserialize(packetData);
 
-            Console.WriteLine(message.ToString());
-            
             if (message == null)
             {
                 _logger.Log("Server received a message relay request with invalid data.");
@@ -1106,13 +1119,21 @@ namespace Servidor
         /// have been sent since the last time it was connected.
         private void Relay(IPLChat.Protocol.Message message, int clientID)
         {
+            Packet resPacket = null;
+
+            // TODO: Optimize this atrocious code.
+
             // This should never happen, but just in case.
             if (!_clientsMap.ContainsKey(clientID))
             {
                 _logger.Log("Server received a message relay request from an unauthenticated peer. More information below:");
+                _logger.Log("     > Requested by: " + clientID);
+                _logger.Log("     > Error: No Match. The client ID of the message does not match any of the authenticated clients.");
+                resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_ERROR);
+                Send(Packet.Serialize(resPacket), clientID);
                 return;
             }
-
+            
             if (message._senderID != _clientsMap[clientID].uuid)
             {
                 _logger.Log("Server received a message relay request with a mismatching sender ID. More information below:");
@@ -1120,6 +1141,8 @@ namespace Servidor
                 _logger.Log("     > Sender ID of the message: " + message._senderID);
                 _logger.Log("     > Expected sender ID: " + _clientsMap[clientID].uuid);
                 _logger.Log("     > Error: No Match. The sender ID of the message does not match the UUID of the client making the request.");
+                resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_ERROR);
+                Send(Packet.Serialize(resPacket), clientID);
                 return;
             }
 
@@ -1130,6 +1153,8 @@ namespace Servidor
                 _logger.Log("     > Requested by: " + _clientsMap[clientID].name + " | " + _clientsMap[clientID].uuid);
                 _logger.Log("     > Requested channel: " + message._channelID);
                 _logger.Log("     > Error: No Match. No channel found with ID: " + message._channelID);
+                resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_ERROR);
+                Send(Packet.Serialize(resPacket), clientID);
                 return;
             }
 
@@ -1139,6 +1164,8 @@ namespace Servidor
                 _logger.Log("     > Requested by: " + _clientsMap[clientID].name + " | " + _clientsMap[clientID].uuid);
                 _logger.Log("     > Requested channel: " + message._channelID);
                 _logger.Log("     > Error: Unauthorized Access. The client is not part of the channel.");
+                resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_ERROR);
+                Send(Packet.Serialize(resPacket), clientID);
                 return;
             }
 
@@ -1148,6 +1175,8 @@ namespace Servidor
                 _logger.Log("     > Requested by: " + _clientsMap[clientID].name + " | " + _clientsMap[clientID].uuid);
                 _logger.Log("     > Requested channel: " + message._channelID);
                 _logger.Log("     > Error: Invalid Signature. The signature of the message does not match the public key of the sender.");
+                resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_ERROR);
+                Send(Packet.Serialize(resPacket), clientID);
                 return;
             }
 
@@ -1162,6 +1191,8 @@ namespace Servidor
                 _logger.Log("     > Requested by: " + _clientsMap[clientID].name + " | " + _clientsMap[clientID].uuid);
                 _logger.Log("     > Requested channel: " + message._channelID);
                 _logger.Log("     > Error: Channel not found. The channel is not currently active in the network.");
+                resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_ERROR);
+                Send(Packet.Serialize(resPacket), clientID);
                 return;
             }
 
@@ -1170,7 +1201,7 @@ namespace Servidor
 
             _logger.Log("Server relayed a message to channel: " + message._channelID);
 
-            Packet resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_SUCCESS);
+            resPacket = new Packet((int)IPLChat.Protocol.PacketType.MESSAGE_SUCCESS);
             Send(Packet.Serialize(resPacket), clientID);
         }
     }

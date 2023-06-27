@@ -105,6 +105,13 @@ namespace Projeto_Tópicos_de_Segurança
             return null;
         }
 
+        public AES GetAESKeyFromKeyChainUUID(string uuid)
+        {
+            byte[] keyChain = GetKeyChain(uuid);
+            AES aes = new ProtoIP.Crypto.AES(keyChain);
+            return aes;
+        }
+
         public void SaveKeyChains(string userUUID)
         {
             string fullPath = _keyChainBasePath + userUUID + ".keychain";

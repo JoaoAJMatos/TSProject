@@ -27,7 +27,7 @@ namespace Servidor
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                Console.WriteLine("The server has encoutered a fatal error. Check the logs for more information.");
+                Console.WriteLine("The server has encoutered a fatal error. If this error occurs after initializing the server for the first time, please reload the application, it might happen with certain hosts.");
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey();
                 Environment.Exit(1);

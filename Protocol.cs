@@ -54,7 +54,16 @@ namespace IPLChat
             HANDSHAKE_NOTIFICATION,
             CLIENT_PUBLIC_KEY,
             CLIENT_AES_KEY,
-            MESSAGE_SUCCESS
+            MESSAGE_SUCCESS,
+            MESSAGE_ERROR,
+            FILE_TRANSFER_REQUEST,
+            FILE_TRANSFER_RESPONSE,
+            FILE_TRANSFER_DATA,
+            FILE_TRANSFER_ERROR,
+            FILE_TRANSFER_NOTIFICATION,
+            FILE_TRANSFER_AUTHORIZATION_TOKEN,
+            USERNAME_REQUEST,
+            USERNAME_RESPONSE,
         }
 
         public class Message
@@ -102,7 +111,7 @@ namespace IPLChat
                     throw new Exception("Failed to sign message.");
                 }
             }
-
+            
             public bool VerifySignature(byte[] rsaPubKey)
             {
                 ProtoIP.Crypto.RSA rsa = new ProtoIP.Crypto.RSA();

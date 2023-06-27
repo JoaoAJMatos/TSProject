@@ -28,7 +28,7 @@ namespace Projeto_Tópicos_de_Segurança
         public string _uuid;
     }
 
-    public class Client : ProtoClient 
+    public class Client : ProtoClient
     {
         // We need a singleton pattern to ensure that only one instance of this class is created.
         // This way every form can access the same instance of this class.
@@ -80,7 +80,7 @@ namespace Projeto_Tópicos_de_Segurança
             _uuid = null;
             _username = null;
             _activeChannelUUID = null;
-            
+
             _notificationHandler = new NotificationHandler();
 
             _subscribedChannels = new List<SChannel>();
@@ -190,7 +190,7 @@ namespace Projeto_Tópicos_de_Segurança
             _serverAES = null;
             _channelAESKeys.Clear();
             _subscribedChannels.Clear();
-            
+
             Receive(false);
         }
 
@@ -258,13 +258,15 @@ namespace Projeto_Tópicos_de_Segurança
         }
 
         // Sends a message to the currently active channel.
-        public void SendMessage(string messageText)
+        public bool SendMessage(string messageText)
         {
             if (_activeChannelUUID == null)
-                return;
+                return false;
 
-            byte[] encryptedMessage = _channelAESKeys[_activeChannelUUID].Encrypt(Encoding.UTF8.GetBytes(messageText));
-            
+            // Get the AES key from the KeyChain
+            AES aes = _keyChainHandler.GetAESKeyFromKeyChainUUID(_activeChannelUUID);
+            byte[] encryptedMessage = aes.Encrypt(Encoding.UTF8.GetBytes(messageText));
+
             IPLChat.Protocol.Message message = new IPLChat.Protocol.Message(_uuid, _activeChannelUUID, encryptedMessage, IPLChat.Protocol.Message.Type.TEXT);
             message.Sign(_rsa);
 
@@ -276,17 +278,12 @@ namespace Projeto_Tópicos_de_Segurança
             _currentChannelMessages.Add(message);
 
             Receive(false);
-        }
+            Packet recPacket = AssembleReceivedDataIntoPacket();
 
-        public void SendFile(string filePath, string fileName)
-        {
-            if (_activeChannelUUID == null)
-                return;
+            if (recPacket._GetType() == (int)IPLChat.Protocol.PacketType.MESSAGE_ERROR)
+                return false;
 
-            byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-            byte[] encryptedFileBytes = _channelAESKeys[_activeChannelUUID].Encrypt(fileBytes);
-            
-            
+            return true;
         }
 
         // Fetches the list of channels that the user is subscribed to from the server.
@@ -330,7 +327,7 @@ namespace Projeto_Tópicos_de_Segurança
             else
                 _channelAESKeys.Add(channelUUID, null);
 
-            
+
             Packet joinChannelRequestPacket = new Packet((int)IPLChat.Protocol.PacketType.JOIN_CHANNEL_REQUEST);
             byte[] data = Encoding.UTF8.GetBytes(channelUUID);
             data = _serverAES.Encrypt(data);
@@ -362,6 +359,23 @@ namespace Projeto_Tópicos_de_Segurança
             return searchResults;
         }
 
+        // Asks the server the name of the client with the given UUID
+        public string AskClientUsernameFromUUID(string UUID)
+        {
+            Packet requestPacket = new Packet((int)IPLChat.Protocol.PacketType.USERNAME_REQUEST);
+            byte[] data = Encoding.UTF8.GetBytes(UUID);
+            data = _serverAES.Encrypt(data);
+            requestPacket.SetPayload(data);
+
+            Send(Packet.Serialize(requestPacket));
+
+            Receive(false);
+            Packet responsePacket = AssembleReceivedDataIntoPacket();
+            byte[] decryptedData = _serverAES.Decrypt(responsePacket.GetDataAs<byte[]>());
+
+            return Encoding.UTF8.GetString(decryptedData);
+        }
+
         // Decodes the channel list received from the server and encoded within the given byte array.
         private static List<SChannel> DecodeChannelList(byte[] data)
         {
@@ -390,28 +404,6 @@ namespace Projeto_Tópicos_de_Segurança
             }
 
             return searchResults;
-        }
-
-        // Decodes channel info from the given byte array.
-        private static SChannel DecodeChannelInfo(byte[] data)
-        {
-            int channelNameLength = data[0];
-            int channelUUIDLength = data[1];
-
-            byte[] channelNameBytes = new byte[channelNameLength];
-            byte[] channelUUIDBytes = new byte[channelUUIDLength];
-
-            Array.Copy(data, 2, channelNameBytes, 0, channelNameLength);
-            Array.Copy(data, 2 + channelNameLength, channelUUIDBytes, 0, channelUUIDLength);
-
-            string channelName = Encoding.UTF8.GetString(channelNameBytes);
-            string channelUUID = Encoding.UTF8.GetString(channelUUIDBytes);
-
-            SChannel channel = new SChannel();
-            channel._name = channelName;
-            channel._uuid = channelUUID;
-
-            return channel;
         }
 
         // Encodes the username and password into a buffer and encrypts them.
@@ -486,14 +478,14 @@ namespace Projeto_Tópicos_de_Segurança
 
             switch (notificationType)
             {
-                case PacketType.HANDSHAKE_NOTIFICATION:
-                    HandleClientToClientHandshake(receivedNotificationPacket);
-                    break;
-                case PacketType.MESSAGE_NOTIFICATION:
-                    HandleMessageReceived(receivedNotificationPacket);
-                    break;
-                default:
-                    break;
+            case PacketType.HANDSHAKE_NOTIFICATION:
+                HandleClientToClientHandshake(receivedNotificationPacket);
+                break;
+            case PacketType.MESSAGE_NOTIFICATION:
+                HandleMessageReceived(receivedNotificationPacket);
+                break;
+            default:
+                break;
             }
         }
 
@@ -520,10 +512,6 @@ namespace Projeto_Tópicos_de_Segurança
                     MessageReceivedCallback();
                 }
             }
-            else if (message._type == IPLChat.Protocol.Message.Type.FILE)
-            {
-                    OnFileReceived(message);
-            }
         }
 
         public string GetChannelNameFromUUID(string channelUUID)
@@ -538,9 +526,6 @@ namespace Projeto_Tópicos_de_Segurança
 
             return channelName;
         }
-
-        // TODO
-        private void OnFileReceived(IPLChat.Protocol.Message message) { }
 
         private void HandleClientToClientHandshake(Packet notificationPacket)
         {
@@ -559,6 +544,9 @@ namespace Projeto_Tópicos_de_Segurança
 
             byte[] decryptedAESKey = _rsa.Decrypt(encryptedAESKey);
             AES aes = new AES(decryptedAESKey);
+
+            _keyChainHandler.AddKeyChain(targetClientUUID, aes._key);
+            _keyChainHandler.SaveKeyChains(_uuid);
 
             if (_channelAESKeys.ContainsKey(targetClientUUID))
                 _channelAESKeys[targetClientUUID] = aes;

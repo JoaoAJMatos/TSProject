@@ -26,10 +26,10 @@ namespace Projeto_Tópicos_de_Segurança
         private string _date;
 
         [Category("Custom Props")]
-        public string UserName
+        public string Name
         {
             get { return _name; }
-            set { _name = value; lbName.Text = value; }
+            set { _name = value; labelName.Text = value; }
         }
 
         [Category("Custom Props")]

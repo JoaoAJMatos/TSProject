@@ -185,7 +185,6 @@ namespace Servidor
                     {
                         result += reader.GetValue(i) + " ";
                     }
-                    Console.WriteLine(result);
                 }
             }
             catch (Exception e)
@@ -204,8 +203,6 @@ namespace Servidor
         {
             List<Channel> subscribedChannels = new List<Channel>();
 
-            Console.WriteLine("Getting subscribed channels for " + clientUUID + "...");
-
             string query = "SELECT * FROM channels_users WHERE user = @client_uuid";
             SQLiteCommand command = new SQLiteCommand(query, _dbConnection);
             command.Parameters.AddWithValue("@client_uuid", clientUUID);
@@ -216,9 +213,7 @@ namespace Servidor
                 SQLiteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    Console.WriteLine("Found channel " + reader.GetString(1));
                     Channel channel = GetChannel(reader.GetString(1), false);
-                    Console.WriteLine("Found channel " + channel._channelName);
                     subscribedChannels.Add(channel);
                 }
             }
@@ -249,11 +244,9 @@ namespace Servidor
             {
                 _dbConnection.Open();
                 command.ExecuteNonQuery();
-                Console.WriteLine("Created channel " + channelName);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error creating channel " + channelName + ": " + e.Message);
                 return DBReturn.ERROR;
             }
             finally { _dbConnection.Close(); }
@@ -273,11 +266,7 @@ namespace Servidor
             {
                 _dbConnection.Open();
                 SQLiteDataReader reader = command.ExecuteReader();
-                if (reader.Read())
-                {
-                    Console.WriteLine("User " + userUUID + " is already subscribed to channel " + channelUUID);
-                }
-                else
+                if (!reader.Read())
                 {
                     query = "INSERT OR IGNORE INTO channels_users (user, channel) VALUES (@user_uuid, @channel_uuid)";
                     command = new SQLiteCommand(query, _dbConnection);
@@ -299,6 +288,32 @@ namespace Servidor
             finally { _dbConnection.Close(); }
 
             return DBReturn.SUCCESS;
+        }
+
+        // Returns the username of a user with the given UUID
+        public string GetUsernameFromUUID(string uuid)
+        {
+            string username = "";
+            string query = "SELECT username FROM users WHERE uuid = @uuid";
+            SQLiteCommand command = new SQLiteCommand(query, _dbConnection);
+            command.Parameters.AddWithValue("@uuid", uuid);
+
+            try
+            {
+                _dbConnection.Open();
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+            }
+            catch (Exception e)
+            {
+                return username;
+            }
+            finally { _dbConnection.Close(); }
+
+            return username;
         }
 
         /// Searches for a channel in the database given a search pattern.
@@ -345,7 +360,6 @@ namespace Servidor
                 if (_dbCachedChannels.ContainsKey(channelUUID)) { return _dbCachedChannels[channelUUID]; }
                 else 
                 {
-                    Console.WriteLine("Channel " + channelUUID + " not found in cache. Loading from database...");
                     Channel channel = LoadChannel(channelUUID, shouldManageDBHandler);
                     return channel; 
                 }
@@ -904,7 +918,6 @@ namespace Servidor
         {
             Channel channel = new Channel();
 
-            Console.WriteLine("Fetching channel with uuid: " + channelUUID + "\n");
             string sql = "SELECT uuid, name, requestCount FROM channels WHERE uuid = @uuid";
 
             try
@@ -921,7 +934,6 @@ namespace Servidor
                     {
                         if (reader.Read())
                         {
-                            Console.WriteLine("BD: Channel uuid -> " + reader.GetString(0) + " name -> " + reader.GetString(1) + " requestCount -> " + reader.GetInt32(2) + "\n");
                             channel._channelID = reader.GetString(0);
                             channel._channelName = reader.GetString(1);
                             channel._channelRequestCount = reader.GetInt32(2);

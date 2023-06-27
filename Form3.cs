@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoIP.Crypto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +9,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace Projeto_Tópicos_de_Segurança
 {
@@ -77,9 +79,13 @@ namespace Projeto_Tópicos_de_Segurança
 
             foreach (var message in _clientInstance._currentChannelMessages)
             {
-                string senderName = _clientInstance.GetChannelNameFromUUID(message._senderID);
                 byte[] encryptedMessage = message._message;
-                byte[] decryptedMessage = _clientInstance._channelAESKeys[_clientInstance._activeChannelUUID].Decrypt(encryptedMessage);
+                string senderUUID = message._senderID;
+                string senderName = _clientInstance.AskClientUsernameFromUUID(senderUUID);
+
+                AES aes = _clientInstance._keyChainHandler.GetAESKeyFromKeyChainUUID(_clientInstance._activeChannelUUID);
+                byte[] decryptedMessage = aes.Decrypt(encryptedMessage);
+                
                 string messageContent = Encoding.UTF8.GetString(decryptedMessage);
 
                 AppendMessageCard(messageContent, senderName);
@@ -150,7 +156,12 @@ namespace Projeto_Tópicos_de_Segurança
                         return;
                     }
 
-                    _clientInstance.SendMessage(msg);
+                    if (!_clientInstance.SendMessage(msg))
+                    {
+                        MessageBox.Show("An error has occured while sending the message. Please try again later.");
+                        return;
+                    }
+
                     AppendMessageCard(msg, _clientInstance._username);
                     txtMessage.Text = "";
                     txtMessage.Focus();
@@ -166,6 +177,15 @@ namespace Projeto_Tópicos_de_Segurança
         {
             MessageCard messageCard = new MessageCard();
             messageCard.Message = message;
+
+            if (username == _clientInstance._username)
+            {
+                messageCard.Name = "You";
+            }
+            else
+            {
+                messageCard.Name = username;
+            }
 
             messageCard.Date = DateTime.Now.ToString("hh:mm:ss tt");
 
@@ -193,22 +213,18 @@ namespace Projeto_Tópicos_de_Segurança
                 txtSearchContacts.Show();
                 txtSearchContacts.Focus();
             }
-
-        }
-
-        private void btnEditProfile_Click(object sender, EventArgs e)
-        {
-
-            UserProfile userProfile = new UserProfile();
-
-            userProfile.ShowDialog();
-            
         }
 
         private void btnAddContact_Click(object sender, EventArgs e)
         {
-            AddContact addContact = new AddContact();
+            // As emposed by the project requirements
+            if (flowLayoutPanelChannels.Controls.Count == 1)
+            {
+                MessageBox.Show("As of now, you can only add one friend.");
+                return;
+            }
 
+            AddContact addContact = new AddContact();
             addContact.ShowDialog();
         }
 
@@ -233,23 +249,6 @@ namespace Projeto_Tópicos_de_Segurança
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            // Open the file explorer to select a file
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "All files (*.*)|*.*";
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                string filePath = openFileDialog.FileName;
-                string fileName = openFileDialog.SafeFileName;
-
-                // Send the file to the server
-                _clientInstance.SendFile(filePath, fileName);
-            }
         }
 
         private void txtSearchContacts_TextChanged(object sender, EventArgs e)

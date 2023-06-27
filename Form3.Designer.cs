@@ -30,10 +30,10 @@
         {
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnLogout = new System.Windows.Forms.Button();
-            this.btnEditProfile = new System.Windows.Forms.Button();
             this.labelUsername = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.buttonAtualizar = new System.Windows.Forms.Button();
             this.flowLayoutPanelChannels = new System.Windows.Forms.FlowLayoutPanel();
             this.panelContacts = new System.Windows.Forms.Panel();
             this.txtSearchContacts = new System.Windows.Forms.TextBox();
@@ -44,10 +44,8 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.labelRemainingCharacters = new System.Windows.Forms.Label();
             this.SendMessage = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.flowLayoutPanelMessages = new System.Windows.Forms.FlowLayoutPanel();
-            this.buttonAtualizar = new System.Windows.Forms.Button();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel3.SuspendLayout();
@@ -59,7 +57,6 @@
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel2.Controls.Add(this.btnLogout);
-            this.panel2.Controls.Add(this.btnEditProfile);
             this.panel2.Controls.Add(this.labelUsername);
             this.panel2.Controls.Add(this.pictureBox1);
             this.panel2.Location = new System.Drawing.Point(0, 327);
@@ -82,22 +79,6 @@
             this.btnLogout.TabIndex = 3;
             this.btnLogout.UseVisualStyleBackColor = true;
             this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
-            // 
-            // btnEditProfile
-            // 
-            this.btnEditProfile.BackColor = System.Drawing.Color.Transparent;
-            this.btnEditProfile.BackgroundImage = global::Projeto_Tópicos_de_Segurança.Properties.Resources.editar_2_;
-            this.btnEditProfile.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnEditProfile.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnEditProfile.FlatAppearance.BorderSize = 0;
-            this.btnEditProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEditProfile.Location = new System.Drawing.Point(207, 26);
-            this.btnEditProfile.Margin = new System.Windows.Forms.Padding(2);
-            this.btnEditProfile.Name = "btnEditProfile";
-            this.btnEditProfile.Size = new System.Drawing.Size(25, 29);
-            this.btnEditProfile.TabIndex = 2;
-            this.btnEditProfile.UseVisualStyleBackColor = false;
-            this.btnEditProfile.Click += new System.EventHandler(this.btnEditProfile_Click);
             // 
             // labelUsername
             // 
@@ -132,6 +113,17 @@
             this.panel3.Size = new System.Drawing.Size(289, 327);
             this.panel3.TabIndex = 3;
             // 
+            // buttonAtualizar
+            // 
+            this.buttonAtualizar.BackColor = System.Drawing.Color.Gainsboro;
+            this.buttonAtualizar.Location = new System.Drawing.Point(0, 302);
+            this.buttonAtualizar.Name = "buttonAtualizar";
+            this.buttonAtualizar.Size = new System.Drawing.Size(289, 25);
+            this.buttonAtualizar.TabIndex = 2;
+            this.buttonAtualizar.Text = "Update Friends List";
+            this.buttonAtualizar.UseVisualStyleBackColor = false;
+            this.buttonAtualizar.Click += new System.EventHandler(this.buttonAtualizar_Click);
+            // 
             // flowLayoutPanelChannels
             // 
             this.flowLayoutPanelChannels.AutoScroll = true;
@@ -159,7 +151,7 @@
             // txtSearchContacts
             // 
             this.txtSearchContacts.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSearchContacts.Location = new System.Drawing.Point(23, 18);
+            this.txtSearchContacts.Location = new System.Drawing.Point(23, 21);
             this.txtSearchContacts.Margin = new System.Windows.Forms.Padding(2);
             this.txtSearchContacts.Multiline = true;
             this.txtSearchContacts.Name = "txtSearchContacts";
@@ -228,7 +220,6 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.labelRemainingCharacters);
             this.panel1.Controls.Add(this.SendMessage);
-            this.panel1.Controls.Add(this.button4);
             this.panel1.Controls.Add(this.txtMessage);
             this.panel1.Location = new System.Drawing.Point(289, 327);
             this.panel1.Margin = new System.Windows.Forms.Padding(2);
@@ -262,22 +253,6 @@
             this.SendMessage.UseVisualStyleBackColor = false;
             this.SendMessage.Click += new System.EventHandler(this.SendMessage_Click);
             // 
-            // button4
-            // 
-            this.button4.BackColor = System.Drawing.Color.Transparent;
-            this.button4.BackgroundImage = global::Projeto_Tópicos_de_Segurança.Properties.Resources.anexar_simbolo_diagonal_de_clipe_de_papel;
-            this.button4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button4.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button4.FlatAppearance.BorderSize = 0;
-            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button4.Location = new System.Drawing.Point(494, 26);
-            this.button4.Margin = new System.Windows.Forms.Padding(2);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(27, 29);
-            this.button4.TabIndex = 5;
-            this.button4.UseVisualStyleBackColor = false;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
             // txtMessage
             // 
             this.txtMessage.BackColor = System.Drawing.Color.Silver;
@@ -286,7 +261,7 @@
             this.txtMessage.Location = new System.Drawing.Point(104, 29);
             this.txtMessage.Margin = new System.Windows.Forms.Padding(2);
             this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(376, 23);
+            this.txtMessage.Size = new System.Drawing.Size(422, 23);
             this.txtMessage.TabIndex = 0;
             this.txtMessage.TextChanged += new System.EventHandler(this.txtMessage_TextChanged);
             this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
@@ -299,17 +274,6 @@
             this.flowLayoutPanelMessages.Name = "flowLayoutPanelMessages";
             this.flowLayoutPanelMessages.Size = new System.Drawing.Size(596, 327);
             this.flowLayoutPanelMessages.TabIndex = 0;
-            // 
-            // buttonAtualizar
-            // 
-            this.buttonAtualizar.BackColor = System.Drawing.Color.Gainsboro;
-            this.buttonAtualizar.Location = new System.Drawing.Point(0, 302);
-            this.buttonAtualizar.Name = "buttonAtualizar";
-            this.buttonAtualizar.Size = new System.Drawing.Size(289, 25);
-            this.buttonAtualizar.TabIndex = 2;
-            this.buttonAtualizar.Text = "Update Friends List";
-            this.buttonAtualizar.UseVisualStyleBackColor = false;
-            this.buttonAtualizar.Click += new System.EventHandler(this.buttonAtualizar_Click);
             // 
             // Form3
             // 
@@ -343,7 +307,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label labelUsername;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Button btnEditProfile;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panelContacts;
         private System.Windows.Forms.Button btnAddContact;
@@ -353,7 +316,6 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelChannels;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button SendMessage;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox txtMessage;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelMessages;
         private System.Windows.Forms.TextBox txtSearchContacts;
